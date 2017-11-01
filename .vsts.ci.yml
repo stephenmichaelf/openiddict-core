@@ -34,16 +34,16 @@ phases:
       arguments: "--configuration $(BuildConfiguration)"
 
   # dotnet publish
-  - task: DotNetCoreCLI@1
-    displayName: "Dotnet publish"
-    inputs:
-      command: "publish"
-      arguments: "--configuration $(BuildConfiguration) --output $(build.artifactstagingdirectory)"
+  # - task: DotNetCoreCLI@1
+    # displayName: "Dotnet publish"
+    # inputs:
+      # command: "publish"
+      # arguments: "--configuration $(BuildConfiguration) --output $(build.artifactstagingdirectory)"
 
   # Publish artifact
-  - task: PublishBuildArtifacts@1
-    displayName: Publish Artifact
-    inputs:
-      pathToPublish: $(Build.ArtifactStagingDirectory)
-      artifactName: drop
-      artifactType: container
+  # - task: PublishBuildArtifacts@1
+    # displayName: Publish Artifact
+    # inputs:
+      # pathToPublish: $(Build.ArtifactStagingDirectory)
+      # artifactName: drop
+      # artifactType: container
