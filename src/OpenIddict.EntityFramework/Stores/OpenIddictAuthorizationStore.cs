@@ -329,8 +329,17 @@ namespace OpenIddict.EntityFramework
         /// </returns>
         public override Task UpdateAsync([NotNull] TAuthorization authorization, CancellationToken cancellationToken)
         {
+            if (authorization == null)
+            {
+                throw new ArgumentNullException(nameof(authorization));
+            }
 
             Authorizations.Attach(authorization);
+
+            // Generate a new concurrency token and attach it
+            // to the authorization before persisting the changes.
+            authorization.ConcurrencyToken = Guid.NewGuid().ToString();
+
             Context.Entry(authorization).State = EntityState.Modified;
 
             return Context.SaveChangesAsync(cancellationToken);
@@ -369,7 +378,7 @@ namespace OpenIddict.EntityFramework
             // Bind the authorization to the specified application, if applicable.
             if (!string.IsNullOrEmpty(descriptor.ApplicationId))
             {
-                var application = await Applications.FindAsync(new object[] { ConvertIdentifierFromString(descriptor.ApplicationId) }, cancellationToken);
+                var application = await Applications.FindAsync(cancellationToken, ConvertIdentifierFromString(descriptor.ApplicationId));
                 if (application == null)
                 {
                     throw new InvalidOperationException("The application associated with the authorization cannot be found.");

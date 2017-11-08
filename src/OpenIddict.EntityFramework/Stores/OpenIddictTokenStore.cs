@@ -393,6 +393,11 @@ namespace OpenIddict.EntityFramework
             }
 
             Tokens.Attach(token);
+
+            // Generate a new concurrency token and attach it
+            // to the token before persisting the changes.
+            token.ConcurrencyToken = Guid.NewGuid().ToString();
+
             Context.Entry(token).State = EntityState.Modified;
 
             return Context.SaveChangesAsync(cancellationToken);
@@ -430,7 +435,7 @@ namespace OpenIddict.EntityFramework
             // Bind the token to the specified client application, if applicable.
             if (!string.IsNullOrEmpty(descriptor.ApplicationId))
             {
-                var application = await Applications.FindAsync(new object[] { ConvertIdentifierFromString(descriptor.ApplicationId) }, cancellationToken);
+                var application = await Applications.FindAsync(cancellationToken, ConvertIdentifierFromString(descriptor.ApplicationId));
                 if (application == null)
                 {
                     throw new InvalidOperationException("The application associated with the token cannot be found.");
@@ -442,7 +447,7 @@ namespace OpenIddict.EntityFramework
             // Bind the token to the specified authorization, if applicable.
             if (!string.IsNullOrEmpty(descriptor.AuthorizationId))
             {
-                var authorization = await Authorizations.FindAsync(new object[] { ConvertIdentifierFromString(descriptor.AuthorizationId) }, cancellationToken);
+                var authorization = await Authorizations.FindAsync(cancellationToken, ConvertIdentifierFromString(descriptor.AuthorizationId));
                 if (authorization == null)
                 {
                     throw new InvalidOperationException("The authorization associated with the token cannot be found.");
