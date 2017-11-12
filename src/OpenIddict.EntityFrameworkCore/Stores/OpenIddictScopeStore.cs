@@ -89,7 +89,7 @@ namespace OpenIddict.EntityFrameworkCore
                 throw new ArgumentNullException(nameof(query));
             }
 
-            return query.Invoke(Scopes).LongCountAsync();
+            return query(Scopes).LongCountAsync();
         }
 
         /// <summary>
@@ -151,14 +151,14 @@ namespace OpenIddict.EntityFrameworkCore
         }
 
         /// <summary>
-        /// Executes the specified query.
+        /// Executes the specified query and returns the first element.
         /// </summary>
         /// <typeparam name="TResult">The result type.</typeparam>
         /// <param name="query">The query to execute.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken"/> that can be used to abort the operation.</param>
         /// <returns>
         /// A <see cref="Task"/> that can be used to monitor the asynchronous operation,
-        /// whose result returns the single element returned when executing the specified query.
+        /// whose result returns the first element returned when executing the query.
         /// </returns>
         public override Task<TResult> GetAsync<TResult>([NotNull] Func<IQueryable<TScope>, IQueryable<TResult>> query, CancellationToken cancellationToken)
         {
@@ -167,11 +167,11 @@ namespace OpenIddict.EntityFrameworkCore
                 throw new ArgumentNullException(nameof(query));
             }
 
-            return query.Invoke(Scopes).SingleOrDefaultAsync(cancellationToken);
+            return query(Scopes).FirstOrDefaultAsync(cancellationToken);
         }
 
         /// <summary>
-        /// Executes the specified query.
+        /// Executes the specified query and returns all the corresponding elements.
         /// </summary>
         /// <typeparam name="TResult">The result type.</typeparam>
         /// <param name="query">The query to execute.</param>
@@ -187,7 +187,7 @@ namespace OpenIddict.EntityFrameworkCore
                 throw new ArgumentNullException(nameof(query));
             }
 
-            return ImmutableArray.Create(await query.Invoke(Scopes).ToArrayAsync(cancellationToken));
+            return ImmutableArray.CreateRange(await query(Scopes).ToListAsync(cancellationToken));
         }
 
         /// <summary>

@@ -5,6 +5,7 @@
  */
 
 using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
@@ -108,7 +109,7 @@ namespace OpenIddict.EntityFrameworkCore
                 throw new ArgumentNullException(nameof(query));
             }
 
-            return query.Invoke(Authorizations).LongCountAsync();
+            return query(Authorizations).LongCountAsync();
         }
 
         /// <summary>
@@ -169,11 +170,11 @@ namespace OpenIddict.EntityFrameworkCore
                 throw new ArgumentNullException(nameof(authorization));
             }
 
-            Task<TToken[]> ListTokensAsync()
+            Task<List<TToken>> ListTokensAsync()
             {
                 return (from token in Tokens
                         where token.Application.Id.Equals(authorization.Id)
-                        select token).ToArrayAsync(cancellationToken);
+                        select token).ToListAsync(cancellationToken);
             }
 
             // Remove all the tokens associated with the application.
@@ -226,7 +227,7 @@ namespace OpenIddict.EntityFrameworkCore
                        select authorization;
             }
 
-            return ImmutableArray.Create(await Query(Authorizations, Applications).ToArrayAsync(cancellationToken));
+            return ImmutableArray.CreateRange(await Query(Authorizations, Applications).ToListAsync(cancellationToken));
         }
 
         /// <summary>
@@ -281,14 +282,14 @@ namespace OpenIddict.EntityFrameworkCore
         }
 
         /// <summary>
-        /// Executes the specified query.
+        /// Executes the specified query and returns the first element.
         /// </summary>
         /// <typeparam name="TResult">The result type.</typeparam>
         /// <param name="query">The query to execute.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken"/> that can be used to abort the operation.</param>
         /// <returns>
         /// A <see cref="Task"/> that can be used to monitor the asynchronous operation,
-        /// whose result returns the single element returned when executing the specified query.
+        /// whose result returns the first element returned when executing the query.
         /// </returns>
         public override Task<TResult> GetAsync<TResult>([NotNull] Func<IQueryable<TAuthorization>, IQueryable<TResult>> query, CancellationToken cancellationToken)
         {
@@ -297,11 +298,11 @@ namespace OpenIddict.EntityFrameworkCore
                 throw new ArgumentNullException(nameof(query));
             }
 
-            return query.Invoke(Authorizations).SingleOrDefaultAsync(cancellationToken);
+            return query(Authorizations).FirstOrDefaultAsync(cancellationToken);
         }
 
         /// <summary>
-        /// Executes the specified query.
+        /// Executes the specified query and returns all the corresponding elements.
         /// </summary>
         /// <typeparam name="TResult">The result type.</typeparam>
         /// <param name="query">The query to execute.</param>
@@ -317,7 +318,7 @@ namespace OpenIddict.EntityFrameworkCore
                 throw new ArgumentNullException(nameof(query));
             }
 
-            return ImmutableArray.Create(await query.Invoke(Authorizations).ToArrayAsync(cancellationToken));
+            return ImmutableArray.CreateRange(await query(Authorizations).ToListAsync(cancellationToken));
         }
 
         /// <summary>
